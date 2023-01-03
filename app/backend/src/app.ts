@@ -1,4 +1,7 @@
 import * as express from 'express';
+import * as cors from 'cors';
+import errorMiddleware from './middlewares/errorMiddleware';
+import loginRouter from './routes/login';
 
 class App {
   public app: express.Express;
@@ -19,9 +22,11 @@ class App {
       res.header('Access-Control-Allow-Headers', '*');
       next();
     };
-
+    this.app.use(cors());
     this.app.use(express.json());
     this.app.use(accessControl);
+    this.app.use('/login', loginRouter);
+    this.app.use(errorMiddleware);
   }
 
   public start(PORT: string | number):void {
