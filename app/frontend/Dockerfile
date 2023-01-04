@@ -1,11 +1,11 @@
-FROM node:16.14.0-alpine
+FROM node:16.14-alpine
 
 WORKDIR /app-frontend
 
-COPY . .
+COPY package.json ./
 
 RUN npm install
 
-EXPOSE 3000
+COPY . .
 
 CMD [ "npm", "start" ]
