@@ -3,26 +3,19 @@ import * as jwt from 'jsonwebtoken';
 import IResponse from '../interfaces/IResponse';
 import { IUserWithoutPassword } from '../interfaces/ILogin';
 
-export default class JsonWebToken {
-  constructor(
-    private jwtSecret = process.env.JWT_SECRET,
-  ) {}
+export const generateToken = (user: IUserWithoutPassword): string =>
+  jwt.sign(user, process.env.JWT_SECRET as string, {
+    algorithm: 'HS256',
+    expiresIn: '1d',
+  });
 
-  generateToken(user: IUserWithoutPassword): string {
-    return jwt.sign(user, this.jwtSecret as string, {
-      algorithm: 'HS256',
-      expiresIn: '1d',
-    });
+export const validateToken = (token: string): IResponse => {
+  if (!token) return { status: 401, message: 'Token not found' };
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET as string);
+    return { status: null, message: payload };
+  } catch (error) {
+    return { status: 401, message: 'Invalid token' };
   }
-
-  validateToken(token: string): IResponse {
-    if (!token) return { status: 401, message: 'Token not found' };
-
-    try {
-      const payload = jwt.verify(token, this.jwtSecret as string);
-      return { status: null, message: payload };
-    } catch (error) {
-      return { status: 401, message: 'Invalid token' };
-    }
-  }
-}
+};
