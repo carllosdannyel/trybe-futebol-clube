@@ -7,9 +7,6 @@ const loginRouter = Router();
 const loginController = new LoginController();
 
 loginRouter.post('/', validationFields, (req, res) => loginController.login(req, res));
-loginRouter.get(
-  '/validate',
-  (req, res) => loginController.loginValidate(req, res),
-);
+loginRouter.get('/validate', (req, res) => loginController.loginValidate(req, res));
 
 export default loginRouter;
