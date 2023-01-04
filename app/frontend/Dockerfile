@@ -1,4 +1,4 @@
-FROM node:16.14-alpine
+FROM node:16.14.0-alpine
 
 WORKDIR /app-frontend
 
@@ -6,4 +6,6 @@ COPY . .
 
 RUN npm install
 
-ENTRYPOINT ["npm", "start"]
+EXPOSE 3000
+
+CMD [ "npm", "start" ]
