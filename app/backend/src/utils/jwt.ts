@@ -10,12 +10,12 @@ export const generateToken = (user: IUserWithoutPassword): string =>
   });
 
 export const validateToken = (token: string): IResponse => {
-  if (!token) return { status: 401, message: 'Token not found' };
+  if (!token) return { status: 401, message: 'Token must be a valid token' };
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET as string);
     return { status: null, message: payload };
   } catch (error) {
-    return { status: 401, message: 'Invalid token' };
+    return { status: 401, message: 'Token must be a valid token' };
   }
 };
