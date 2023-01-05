@@ -20,5 +20,10 @@ matchesRouter.patch(
   authMiddleware,
   (req, res) => matchesController.finishMatches(req, res),
 );
+matchesRouter.patch(
+  '/:id',
+  authMiddleware,
+  (req, res) => matchesController.updateMatches(req, res),
+);
 
 export default matchesRouter;

@@ -1,5 +1,5 @@
 import { Op } from 'sequelize';
-import { IMatcherCreate } from '../interfaces/IMatcherCreate';
+import { IGoals, IMatcherCreate } from '../interfaces/IMatcherCreate';
 import Teams from '../database/models/Teams';
 import Matches from '../database/models/Matches';
 
@@ -45,13 +45,20 @@ export default class MatchesService {
   public async createMatches(body: IMatcherCreate) {
     const { homeTeam, awayTeam, homeTeamGoals, awayTeamGoals } = body;
     if (homeTeam === awayTeam) {
-      return { status: 422, message: 'It is not possible to create a match with two equal teams' };
+      return {
+        status: 422,
+        message: 'It is not possible to create a match with two equal teams',
+      };
     }
     if (await this.findTeams(homeTeam, awayTeam)) {
       return { status: 404, message: 'There is no team with such id!' };
     }
     const match = await this.matches.create({
-      homeTeam, awayTeam, homeTeamGoals, awayTeamGoals, inProgress: true,
+      homeTeam,
+      awayTeam,
+      homeTeamGoals,
+      awayTeamGoals,
+      inProgress: true,
     });
     return { status: null, message: match };
   }
@@ -59,5 +66,14 @@ export default class MatchesService {
   public async finishMatches(id: string) {
     await this.matches.update({ inProgress: false }, { where: { id } });
     return { status: null, message: { message: 'Finished' } };
+  }
+
+  public async updateMatches(id: string, body: IGoals) {
+    const { awayTeamGoals, homeTeamGoals } = body;
+    const newMatcher = await this.matches.update(
+      { awayTeamGoals, homeTeamGoals },
+      { where: { id } },
+    );
+    return { status: null, message: newMatcher };
   }
 }
