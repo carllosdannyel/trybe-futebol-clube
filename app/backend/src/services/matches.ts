@@ -42,8 +42,19 @@ export default class MatchesService {
     return false;
   }
 
-  public async createMatches(body: IMatcherCreate) {
+  private async createNewMatches(body: IMatcherCreate) {
     const { homeTeam, awayTeam, homeTeamGoals, awayTeamGoals } = body;
+    return this.matches.create({
+      homeTeam,
+      awayTeam,
+      homeTeamGoals,
+      awayTeamGoals,
+      inProgress: true,
+    });
+  }
+
+  public async createMatches(body: IMatcherCreate) {
+    const { homeTeam, awayTeam } = body;
     if (homeTeam === awayTeam) {
       return {
         status: 422,
@@ -53,27 +64,30 @@ export default class MatchesService {
     if (await this.findTeams(homeTeam, awayTeam)) {
       return { status: 404, message: 'There is no team with such id!' };
     }
-    const match = await this.matches.create({
-      homeTeam,
-      awayTeam,
-      homeTeamGoals,
-      awayTeamGoals,
-      inProgress: true,
-    });
+    const match = await this.createNewMatches(body);
     return { status: null, message: match };
   }
 
-  public async finishMatches(id: string) {
+  private async finish(id: string) {
     await this.matches.update({ inProgress: false }, { where: { id } });
-    return { status: null, message: { message: 'Finished' } };
+    return 'Finished';
   }
 
-  public async updateMatches(id: string, body: IGoals) {
+  public async finishMatches(id: string) {
+    const finish = await this.finish(id);
+    return { status: null, message: finish };
+  }
+
+  private async updateNewMatches(id: string, body: IGoals) {
     const { awayTeamGoals, homeTeamGoals } = body;
-    const newMatcher = await this.matches.update(
+    return this.matches.update(
       { awayTeamGoals, homeTeamGoals },
       { where: { id } },
     );
+  }
+
+  public async updateMatches(id: string, body: IGoals) {
+    const newMatcher = await this.updateNewMatches(id, body);
     return { status: null, message: newMatcher };
   }
 }

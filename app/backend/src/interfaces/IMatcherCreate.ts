@@ -9,6 +9,6 @@ export interface IMatcherCreate extends IGoals {
 }
 
 export default interface IMatcherCreateId extends IMatcherCreate {
-  id: number;
+  id?: number;
   inProgress: boolean;
 }

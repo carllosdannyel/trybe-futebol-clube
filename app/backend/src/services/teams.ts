@@ -4,8 +4,12 @@ import Teams from '../database/models/Teams';
 export default class TeamsService {
   private teams = Teams;
 
+  public async allTeams() {
+    return this.teams.findAll();
+  }
+
   public async findAllTeams(): Promise<IResponse> {
-    const teams = await this.teams.findAll();
+    const teams = await this.allTeams();
 
     return { status: null, message: teams };
   }
