@@ -10,4 +10,10 @@ export default class LeaderboardController {
     if (status) return res.status(status).json({ message });
     res.status(200).json(message);
   }
+
+  public async leaderBoardAway(req: Request, res: Response) {
+    const { status, message } = await this.leaderboard.leaderBoardAway() as unknown as Exception;
+    if (status) return res.status(status).json({ message });
+    res.status(200).json(message);
+  }
 }

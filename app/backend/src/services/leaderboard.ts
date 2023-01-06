@@ -39,6 +39,25 @@ export default class LeaderboardService {
     return board;
   };
 
+  private rulesValidationsAway = async (team: ITeams, matches: IMatcherCreateId[]) => {
+    const board = { ...this.board };
+    matches.forEach((match) => {
+      if (match.awayTeam === team.id) {
+        board.name = team.teamName;
+        board.totalGames += 1;
+        board.goalsFavor += match.awayTeamGoals;
+        board.goalsOwn += match.homeTeamGoals;
+        if (match.homeTeamGoals < match.awayTeamGoals) board.totalVictories += 1;
+        if (match.homeTeamGoals === match.awayTeamGoals) board.totalDraws += 1;
+        if (match.homeTeamGoals > match.awayTeamGoals) board.totalLosses += 1;
+        board.goalsBalance = board.goalsFavor - board.goalsOwn;
+        board.totalPoints = (board.totalVictories * 3) + board.totalDraws;
+        board.efficiency = ((board.totalPoints / (board.totalGames * 3)) * 100).toFixed(2);
+      }
+    });
+    return board;
+  };
+
   private static sortLeaderboard = (board: ILeaderboard[]): ILeaderboard[] => (
     board.sort((a, b) => {
       if (a.totalPoints !== b.totalPoints) return b.totalPoints - a.totalPoints;
@@ -54,6 +73,19 @@ export default class LeaderboardService {
     if (teams && matches) {
       const teamsFiltered = await Promise.all(teams.map((team: ITeams) =>
         this.rulesValidationsHome(team, matches)));
+      return {
+        status: null,
+        message: LeaderboardService.sortLeaderboard(teamsFiltered),
+      };
+    }
+  }
+
+  public async leaderBoardAway() {
+    const teams = await this.teams.allTeams();
+    const matches = await this.matches.findMatchesInProgress('false');
+    if (teams && matches) {
+      const teamsFiltered = await Promise.all(teams.map((team: ITeams) =>
+        this.rulesValidationsAway(team, matches)));
       return {
         status: null,
         message: LeaderboardService.sortLeaderboard(teamsFiltered),
