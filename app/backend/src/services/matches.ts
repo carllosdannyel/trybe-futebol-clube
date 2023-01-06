@@ -9,7 +9,6 @@ export default class MatchesService {
 
   public async findMatchesInProgress(query: string) {
     const inProgress = query !== undefined && query === 'true';
-
     return this.matches.findAll({
       where: { [Op.or]: [{ inProgress }] },
       include: [
