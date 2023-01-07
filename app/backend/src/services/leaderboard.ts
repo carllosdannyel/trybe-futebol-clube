@@ -58,6 +58,27 @@ export default class LeaderboardService {
     return board;
   };
 
+  private static rulesValidationsAwayAndHome(matches: ILeaderboard[]) {
+    const newScore = matches.reduce((acc, cur) => {
+      const found = acc.find((el) => el.name === cur.name);
+      if (found) {
+        found.totalPoints += cur.totalPoints;
+        found.totalGames += cur.totalGames;
+        found.totalVictories += cur.totalVictories;
+        found.totalDraws += cur.totalDraws;
+        found.totalLosses += cur.totalLosses;
+        found.goalsFavor += cur.goalsFavor;
+        found.goalsOwn += cur.goalsOwn;
+        found.goalsBalance += cur.goalsBalance;
+        found.efficiency = ((found.totalPoints / (found.totalGames * 3)) * 100).toFixed(2);
+      } else {
+        acc.push(cur);
+      }
+      return acc;
+    }, [] as ILeaderboard[]);
+    return newScore;
+  }
+
   private static sortLeaderboard = (board: ILeaderboard[]): ILeaderboard[] => (
     board.sort((a, b) => {
       if (a.totalPoints !== b.totalPoints) return b.totalPoints - a.totalPoints;
@@ -71,11 +92,11 @@ export default class LeaderboardService {
     const teams = await this.teams.allTeams();
     const matches = await this.matches.findMatchesInProgress('false');
     if (teams && matches) {
-      const teamsFiltered = await Promise.all(teams.map((team: ITeams) =>
+      const teamsFilteredHome = await Promise.all(teams.map((team: ITeams) =>
         this.rulesValidationsHome(team, matches)));
       return {
         status: null,
-        message: LeaderboardService.sortLeaderboard(teamsFiltered),
+        message: LeaderboardService.sortLeaderboard(teamsFilteredHome),
       };
     }
   }
@@ -84,11 +105,35 @@ export default class LeaderboardService {
     const teams = await this.teams.allTeams();
     const matches = await this.matches.findMatchesInProgress('false');
     if (teams && matches) {
-      const teamsFiltered = await Promise.all(teams.map((team: ITeams) =>
+      const teamsFilteredAway = await Promise.all(teams.map((team: ITeams) =>
         this.rulesValidationsAway(team, matches)));
       return {
         status: null,
-        message: LeaderboardService.sortLeaderboard(teamsFiltered),
+        message: LeaderboardService.sortLeaderboard(teamsFilteredAway),
+      };
+    }
+  }
+
+  public async leaderBoard() {
+    const teams = await this.teams.allTeams();
+    const matches = await this.matches.findMatchesInProgress('false');
+    if (teams && matches) {
+      const teamsFilteredHome = await Promise.all(teams.map((team: ITeams) =>
+        this.rulesValidationsHome(team, matches)));
+
+      const teamsFilteredAway = await Promise.all(teams.map((team: ITeams) =>
+        this.rulesValidationsAway(team, matches)));
+
+      const allTeams = [
+        ...LeaderboardService.sortLeaderboard(teamsFilteredAway),
+        ...LeaderboardService.sortLeaderboard(teamsFilteredHome),
+      ];
+
+      const newScore = LeaderboardService.rulesValidationsAwayAndHome(allTeams);
+
+      return {
+        status: null,
+        message: LeaderboardService.sortLeaderboard(newScore),
       };
     }
   }

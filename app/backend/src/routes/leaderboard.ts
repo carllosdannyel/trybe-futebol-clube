@@ -5,6 +5,10 @@ const leaderboardRouter = Router();
 const leaderboard = new LeaderboardController();
 
 leaderboardRouter.get(
+  '/',
+  (req, res) => leaderboard.leaderBoard(req, res),
+);
+leaderboardRouter.get(
   '/home',
   (req, res) => leaderboard.leaderBoardHome(req, res),
 );

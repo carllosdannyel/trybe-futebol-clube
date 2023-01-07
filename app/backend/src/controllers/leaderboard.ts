@@ -16,4 +16,10 @@ export default class LeaderboardController {
     if (status) return res.status(status).json({ message });
     res.status(200).json(message);
   }
+
+  public async leaderBoard(req: Request, res: Response) {
+    const { status, message } = await this.leaderboard.leaderBoard() as unknown as Exception;
+    if (status) return res.status(status).json({ message });
+    res.status(200).json(message);
+  }
 }
